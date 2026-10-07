@@ -1,0 +1,195 @@
+name: Mobile Web CI
+
+# Runs the WebdriverIO + Appium 2 mobile-web suite on every push and PR.
+# Two parallel jobs:
+#   - ios: needs a macOS runner (Xcode 16+ for the iPhone 17 simulator)
+#   - android: needs a Linux runner (Android SDK + a pre-created AVD)
+#
+# This workflow is designed to run on real CI infrastructure. For local
+# development, use `npm run test:ios` / `npm run test:android`.
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: TypeScript lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - run: npm run lint
+
+  ios:
+    name: iOS Safari (XCUITest)
+    runs-on: macos-14     # macOS 14 Sonoma + Xcode 15.4+ preinstalled
+    needs: lint
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Select Xcode 16 (iPhone 17 simulator)
+        run: sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer
+      - name: List available simulators
+        run: xcrun simctl list devices available | head -50
+
+      - name: Install Node dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Install Appium 2 drivers
+        run: npm run appium:install-drivers
+
+      - name: Start Appium server
+        run: |
+          npx appium --base-path /wd/hub --port 4723 > appium.log 2>&1 &
+          # Wait for Appium to be ready
+          for i in {1..30}; do
+            if curl -sf http://127.0.0.1:4723/status >/dev/null 2>&1; then
+              echo "Appium is up"
+              break
+            fi
+            echo "Waiting for Appium... $i"
+            sleep 2
+          done
+
+      - name: Create iPhone 17 simulator
+        run: |
+          # Find the iPhone 17 device type / runtime and create a simulator.
+          DEVTYPE=$(xcrun simctl list devicetypes | awk '/iPhone 17/ {print $NF; exit}')
+          RUNTIME=$(xcrun simctl list runtimes | awk -F'-' '/iOS 18/ {print $NF; exit}')
+          xcrun simctl create "iPhone 17 CI" "${DEVTYPE}" "${RUNTIME}"
+          xcrun simctl boot "iPhone 17 CI"
+
+      - name: Run smoke suite
+        run: npm run test:ios:smoke
+
+      - name: Run full iOS suite
+        if: success()
+        run: npm run test:ios
+
+      - name: Generate Allure report
+        if: always()
+        run: npm run report:generate
+
+      - name: Upload Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-ios
+          path: allure-report/
+          retention-days: 30
+
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-screenshots
+          path: screenshots/
+          retention-days: 7
+
+  android:
+    name: Android Chrome (UiAutomator2)
+    runs-on: macos-14     # macOS runner for best Android emulation
+    needs: lint
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses
+
+      - name: Install system-image;android-34
+        run: sdkmanager "system-images;android-34;google_apis;arm64-v8a"
+
+      - name: Create Galaxy AVD
+        run: |
+          echo "no" | avdmanager create avd \
+            -n Galaxy_S24_API_34 \
+            -k "system-images;android-34;google_apis;arm64-v8a" \
+            -d "pixel_8_pro" \
+            --force
+
+      - name: Install Node dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Install Appium 2 drivers
+        run: npm run appium:install-drivers
+
+      - name: Start Appium server
+        run: |
+          npx appium --port 4723 > appium.log 2>&1 &
+          for i in {1..30}; do
+            if curl -sf http://127.0.0.1:4723/status >/dev/null 2>&1; then
+              echo "Appium is up"
+              break
+            fi
+            echo "Waiting for Appium... $i"
+            sleep 2
+          done
+
+      - name: Start Android emulator
+        run: |
+          # Use the bundled AVD we created. -no-snapshot-load keeps CI fast.
+          nohup $ANDROID_HOME/emulator/emulator \
+            -avd Galaxy_S24_API_34 \
+            -no-window -no-audio -no-boot-anim -no-snapshot \
+            -gpu swiftshader_indirect \
+            > emulator.log 2>&1 &
+          # Wait for emulator
+          adb wait-for-device
+          adb shell input keyevent 82 # unlock
+
+      - name: Run smoke suite
+        run: npm run test:android:smoke
+
+      - name: Run full Android suite
+        if: success()
+        run: npm run test:android
+
+      - name: Generate Allure report
+        if: always()
+        run: npm run report:generate
+
+      - name: Upload Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-android
+          path: allure-report/
+          retention-days: 30
+
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-screenshots
+          path: screenshots/
+          retention-days: 7

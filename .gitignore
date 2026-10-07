@@ -1,0 +1,14 @@
+node_modules/
+dist/
+allure-results/
+allure-report/
+screenshots/
+reports/
+*.log
+.env
+.env.local
+coverage/
+.DS_Store
+downloads/
+appium-debug.log
+.claude/

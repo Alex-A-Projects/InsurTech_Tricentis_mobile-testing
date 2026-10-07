@@ -1,0 +1,15 @@
+{
+  "make": "Volkswagen",
+  "model": "California",
+  "cylinderCapacity": 2200,
+  "enginePerformance": 150,
+  "dateOfManufacture": "05/20/2022",
+  "numberOfSeats": "4",
+  "rightHandDrive": "No",
+  "fuelType": "Diesel",
+  "payload": 500,
+  "totalWeight": 3500,
+  "listPrice": 60000,
+  "licensePlateNumber": "CM99-PER",
+  "annualMileage": 8000
+}

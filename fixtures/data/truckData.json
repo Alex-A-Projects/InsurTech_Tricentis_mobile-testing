@@ -1,0 +1,15 @@
+{
+  "make": "Ford",
+  "model": "Cargo",
+  "cylinderCapacity": 2000,
+  "enginePerformance": 180,
+  "dateOfManufacture": "06/15/2019",
+  "numberOfSeats": "2",
+  "rightHandDrive": "No",
+  "fuelType": "Diesel",
+  "payload": 750,
+  "totalWeight": 18000,
+  "listPrice": 45000,
+  "licensePlateNumber": "TR99-UCK",
+  "annualMileage": 30000
+}

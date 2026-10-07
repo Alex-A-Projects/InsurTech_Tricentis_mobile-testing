@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Tricentis app bugs (documented)",
+    "messageRegex": ".*price table.*not.*render.*",
+    "matchedStatuses": ["failed"]
+  },
+  {
+    "name": "Cookie / domain issues",
+    "messageRegex": ".*(setCookies|cookie|domain).*",
+    "matchedStatuses": ["failed"]
+  },
+  {
+    "name": "idealforms / jQuery quirks",
+    "messageRegex": ".*(idealforms|nextStep|initcalculation).*",
+    "matchedStatuses": ["failed"]
+  },
+  {
+    "name": "Mobile viewport / scroll",
+    "messageRegex": ".*(scrollIntoView|viewport|off.?screen).*",
+    "matchedStatuses": ["failed"]
+  },
+  {
+    "name": "Network / DNS / Appium connectivity",
+    "messageRegex": ".*(ENOTFOUND|ECONNREFUSED|session not created|Appium).*",
+    "matchedStatuses": ["failed", "broken"]
+  },
+  {
+    "name": "Test data flake (time-of-run dependent)",
+    "messageRegex": ".*(Date of Birth|year|DOB).*",
+    "matchedStatuses": ["failed"]
+  }
+]

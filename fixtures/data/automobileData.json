@@ -1,0 +1,13 @@
+{
+  "make": "Audi",
+  "model": "Scooter",
+  "cylinderCapacity": 1500,
+  "enginePerformance": 120,
+  "dateOfManufacture": "01/01/2020",
+  "numberOfSeats": "5",
+  "rightHandDrive": "No",
+  "fuelType": "Petrol",
+  "listPrice": 25000,
+  "licensePlateNumber": "AB12-CDE-3",
+  "annualMileage": 12000
+}

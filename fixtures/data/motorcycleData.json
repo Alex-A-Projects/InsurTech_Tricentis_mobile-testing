@@ -1,0 +1,13 @@
+{
+  "make": "Honda",
+  "model": "Motorcycle",
+  "cylinderCapacity": 600,
+  "enginePerformance": 60,
+  "dateOfManufacture": "03/10/2021",
+  "numberOfSeats": "2",
+  "rightHandDrive": "No",
+  "fuelType": "Petrol",
+  "listPrice": 8000,
+  "licensePlateNumber": "MC42-IND",
+  "annualMileage": 5000
+}

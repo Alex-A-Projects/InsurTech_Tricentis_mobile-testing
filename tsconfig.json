@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022", "DOM"],
+    "outDir": "./dist",
+    "rootDir": "./",
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": false,
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "types": ["node", "@wdio/globals", "@wdio/types", "mocha"]
+  },
+  "include": [
+    "tests/**/*",
+    "pages/**/*",
+    "components/**/*",
+    "utils/**/*",
+    "fixtures/**/*",
+    "wdio.shared.conf.ts",
+    "wdio.ios.conf.ts",
+    "wdio.android.conf.ts"
+  ],
+  "exclude": ["node_modules", "dist", "allure-results", "screenshots"]
+}
